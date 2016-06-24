@@ -35,7 +35,8 @@ angular.module('ui.router.tabs').directive(
         type: '@',
         justified: '@',
         vertical: '@',
-        class: '@'
+        class: '@',
+        baseState: '@'
       },
       link: function(scope) {
 
@@ -43,10 +44,22 @@ angular.module('ui.router.tabs').directive(
           scope.update_tabs();
         };
 
-        var unbindStateChangeSuccess = $rootScope.$on('$stateChangeSuccess', updateTabs);
-        var unbindStateChangeError = $rootScope.$on('$stateChangeError', updateTabs);
-        var unbindStateChangeCancel = $rootScope.$on('$stateChangeCancel', updateTabs);
-        var unbindStateNotFound = $rootScope.$on('$stateNotFound', updateTabs);
+        var unbindStateChangeSuccess = $rootScope.$on('$stateChangeSuccess', function (_, toState) {
+          if (toState.name.indexOf(scope.baseState) > -1)
+            updateTabs();
+        });
+        var unbindStateChangeError = $rootScope.$on('$stateChangeError', function (_, toState) {
+          if (toState.name.indexOf(scope.baseState) > -1)
+            updateTabs();
+        });
+        var unbindStateChangeCancel = $rootScope.$on('$stateChangeCancel', function (_, toState) {
+          if (toState.name.indexOf(scope.baseState) > -1)
+            updateTabs();
+        });
+        var unbindStateNotFound = $rootScope.$on('$stateNotFound', function (_, toState) {
+          if (toState.name.indexOf(scope.baseState) > -1)
+            updateTabs();
+        });
 
         scope.$on('$destroy', unbindStateChangeSuccess);
         scope.$on('$destroy', unbindStateChangeError);
@@ -109,18 +122,24 @@ angular.module('ui.router.tabs').directive(
 ['$templateCache', function($templateCache) {
     var CUSTOM_UI_VIEW_TEMPLATE = '<div>' +
       '<uib-tabset active="tabs.active" class="tab-container" type="{{type}}" vertical="{{vertical}}" justified="{{justified}}" class="{{class}}">' +
-      '<uib-tab class="tab {{tab.class}}" ng-repeat="tab in tabs" ' +
-      'disable="tab.disable" ng-click="go(tab)">' +
-      '<uib-tab-heading ng-bind-html="tab.heading"></uib-tab-heading>' +
+      '<uib-tab class="tab {{tab.class}}" ng-repeat="tab in tabs" disable="tab.disable" ng-click="go(tab)">' +
+      '<uib-tab-heading class="text-center">' +
+      '<div ng-if="tab.icon"><i class="fa" ng-class="::tab.icon"></i></div>' +
+      '<div ng-if="tab.image" class="tab-image"><img ng-src="{{tab.image}}"></div>' +
+      '<div><span class="tab-heading">{{tab.heading}}</span></div>'
+      '</uib-tab-heading>' +
       '</uib-tab>' +
       '</uib-tabset>' +
       '</div>';
 
     var INLINE_TEMPLATE = '<div>' +
       '<uib-tabset active="tabs.active" class="tab-container" type="{{type}}" vertical="{{vertical}}" justified="{{justified}}" class="{{class}}">' +
-      '<uib-tab class="tab {{tab.class}}" ng-repeat="tab in tabs" ' +
-      'disable="tab.disable" ng-click="go(tab)">' +
-      '<uib-tab-heading ng-bind-html="tab.heading"></uib-tab-heading>' +
+      '<uib-tab class="tab {{tab.class}}" ng-repeat="tab in tabs" disable="tab.disable" ng-click="go(tab)">' +
+      '<uib-tab-heading ng-bind-html="tab.heading">' +
+      '<div ng-if="tab.icon"><i class="fa" ng-class="::tab.icon"></i></div>' +
+      '<div ng-if="tab.image" class="tab-image"><img ng-src="{{tab.image}}"></div>' +
+      '<div><span class="tab-heading">{{tab.heading}}</span></div>' +
+      '</uib-tab-heading>' +
       '</uib-tab>' +
       '</uib-tabset>' +
       '<ui-view></ui-view>' +
